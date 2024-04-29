@@ -1,0 +1,30 @@
+# Check if the script is running with administrative privileges
+if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+    # Relaunch the script with administrative privileges
+    Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    exit
+}
+
+# Function to uninstall a package
+function Uninstall-Package {
+    param(
+        [string]$PackageName
+    )
+
+    $package = Get-Package -Name $PackageName -ErrorAction SilentlyContinue
+
+    if ($package) {
+        # Uninstall the package
+        try {
+            $package | Uninstall-Package -AllVersions -Force -ErrorAction Stop
+        } catch {
+            # Silently handle the error
+        }
+    }
+}
+
+# Uninstall Dell SupportAssist
+Uninstall-Package -PackageName "Dell SupportAssist"
+
+# Uninstall Dell Optimizer
+Uninstall-Package -PackageName "Dell Optimizer"
