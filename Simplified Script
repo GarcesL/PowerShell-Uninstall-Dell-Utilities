@@ -1,0 +1,23 @@
+if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+    Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    exit
+}
+
+function Uninstall-Package {
+    param(
+        [string[]]$PackageNames
+    )
+
+    foreach ($PackageName in $PackageNames) {
+        $package = Get-Package -Name $PackageName -ErrorAction SilentlyContinue
+        if ($package) {
+            try {
+                $package | Uninstall-Package -AllVersions -Force -ErrorAction Stop
+            } catch {
+                # Silently handle the error
+            }
+        }
+    }
+}
+
+Uninstall-Package -PackageNames "Dell SupportAssist", "Dell Optimizer"
